@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>True Balance Pediatric Therapy — Content Workspace</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a1628; color: #e8edf2; font-family: Georgia, serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+    ::-webkit-scrollbar-thumb { background: rgba(42,140,140,0.4); border-radius: 3px; }
+    code { font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+
+// ─── DATA ──────────────────────────────────────────────────────────────────
+const CONDITIONS = [
+  { name: "Lip & Tongue Tie", icon: "👅", anthony: "Soft tissue MFR to reduce fascial tension post-frenectomy, decompress suboccipital region, normalize oral floor mobility", courtney: "Oral motor re-education, latch retraining, tongue elevation & lateralization drills, nasal breathing protocols" },
+  { name: "Torticollis", icon: "🌀", anthony: "SCM release, suboccipital decompression, thoracic inlet MFR, atlanto-occipital joint mobility", courtney: "Oral compensatory pattern correction, neck-tongue reflex integration, jaw symmetry tracking" },
+  { name: "TMJ / Jaw Dysfunction", icon: "🦷", anthony: "Masseter & pterygoid MFR, temporal bone release, cervical spine decompression", courtney: "Jaw posture retraining, swallow pattern correction, chewing muscle coordination exercises" },
+  { name: "Breastfeeding Difficulty", icon: "🤱", anthony: "Oral floor release, cervical tension reduction, thoracic outlet decompression for latch pain", courtney: "Infant oral assessment, suck-swallow-breathe coordination, maternal guidance for positioning" },
+  { name: "Mouth Breathing / Nasal Obstruction", icon: "👃", anthony: "Diaphragm release, cervical fascia decompression, rib cage mobility for breathing mechanics", courtney: "Nasal breathing training, lip seal exercises, tongue resting posture retraining" },
+  { name: "Plagiocephaly / Head Shape", icon: "🧠", anthony: "Cranial suture mobility, sacral decompression, whole-body fascial pattern correction", courtney: "Oral compensatory pattern tracking related to asymmetric head position" },
+  { name: "Colic / Gut Tension", icon: "💛", anthony: "Abdominal fascia release, diaphragm work, vagal nerve pathway mobilization", courtney: "Swallow dysfunction assessment contributing to gas/reflux patterns" },
+  { name: "Sensory / Feeding Aversions", icon: "🍽️", anthony: "Oral hypersensitivity via graded MFR to lips, cheeks, gums; vestibular input", courtney: "Oral desensitization progressions, texture hierarchy, chewing skill development" },
+  { name: "Sleep Disordered Breathing / Snoring", icon: "😴", anthony: "Thoracic inlet release, diaphragm & rib cage mobility, cervical decompression to optimize airway space", courtney: "Tongue tone & posture retraining, soft palate exercises, nasal breathing protocol to reduce airway collapse during sleep" },
+  { name: "Acid Reflux / GERD (Infant)", icon: "🔥", anthony: "Diaphragmatic release, esophageal hiatus decompression, abdominal and thoracic fascial unwinding", courtney: "Suck-swallow-breathe rhythm correction to reduce air swallowing; pacing and positioning guidance during feeds" },
+  { name: "Speech Delays / Articulation", icon: "💬", anthony: "Facial soft tissue MFR (cheeks, lips, jaw), cervical tension release to free cranial nerve pathways", courtney: "Oral motor strengthening for articulation, tongue-to-palate placement for target sounds, lip seal and jaw stability training" },
+  { name: "Chronic Ear Infections / Otitis Media", icon: "👂", anthony: "Temporal bone release, Eustachian tube fascial decompression, cervical lymphatic drainage facilitation", courtney: "Nasal breathing retraining to reduce chronic congestion and fluid backup in middle ear" },
+  { name: "Bruxism / Teeth Grinding", icon: "😬", anthony: "Masseter, temporalis & pterygoid MFR, cranial base decompression, cervical tension release", courtney: "Jaw resting posture retraining, nocturnal clenching awareness, tongue position exercises to reduce jaw load" },
+  { name: "Birth Trauma / Cranial Asymmetry", icon: "👶", anthony: "Craniosacral-informed MFR, temporal and sphenoid decompression, dural tube mobility, sacral release for birth compression patterns", courtney: "Oral assessment post-vacuum or forceps delivery; early intervention for feeding asymmetries linked to cranial strain" },
+  { name: "Thumb Sucking / Oral Habits", icon: "👍", anthony: "Oral floor and palate fascial release to reduce the tension driving the sucking need; cheek and lip MFR", courtney: "Habit elimination protocol, tongue resting posture retraining as a replacement behavior, palatal reshaping awareness" },
+];
+
+const PHILOSOPHIES = [
+  { label: "Anthony — Myofascial Release", color: "#1C2B39", accent: "#2A8C8C", points: ["Soft tissue restrictions are the root of movement dysfunction", "Fascia connects every structure — treat the whole, not just the symptom", "Gentle sustained pressure (90-120 sec) unlocks fascial barriers", "Release must precede activation — movement before strength", "The body self-corrects when restrictions are removed"] },
+  { label: "Courtney — Myofunctional Therapy", color: "#4A5568", accent: "#68B5B8", points: ["Oral posture determines airway, sleep, and growth patterns", "Tongue-to-palate resting position is foundational", "Nasal breathing is non-negotiable for craniofacial development", "Muscle re-education follows motor learning principles", "Function drives form — correct movement reshapes structure"] },
+];
+
+const SOCIAL_POSTS = [
+  // ── Education ──
+  { category: "Education", platform: "Instagram / Facebook", title: "What is MFR for babies?", hook: "Your baby's tight jaw isn't just teething — it might be fascial tension.", body: "Myofascial Release (MFR) uses gentle, sustained pressure on the connective tissue surrounding muscles and joints. In infants, this can address tightness from birth positioning, tongue tie, or torticollis. No cracking. No forcing. Just a slow, intentional release that lets the body self-correct. 🙌 Tag a parent who needs to hear this.", tags: "#MFR #TongueTie #PediatricTherapy #TrueBalanceFitness #GulfportMS" },
+  { category: "Education", platform: "Instagram / Facebook", title: "What is Myofunctional Therapy?", hook: "The way your child breathes right now is shaping their face.", body: "Myofunctional therapy retrains the muscles of the tongue, lips, and jaw to function properly. Poor oral posture leads to open-mouth breathing, crooked teeth, sleep issues, and even behavior problems. With targeted exercises, we can correct the root cause — not just the symptoms. 💪", tags: "#MyofunctionalTherapy #OralHealth #MouthBreathing #PediatricDentistry" },
+  { category: "Education", platform: "Carousel", title: "Fascia 101: What Parents Need to Know", hook: "There's a web inside your child's body connecting everything — and when it tightens, everything feels it.", body: "Fascia is the connective tissue that wraps every muscle, bone, nerve, and organ. Think of it like a full-body wetsuit.\n\nWhen one area tightens — from birth, a fall, surgery, or even chronic muscle patterns — the tension travels through the whole system.\n\nThat's why a tongue tie can cause neck tightness. Why torticollis can affect the jaw. Why a c-section birth can leave a baby with body-wide tension.\n\nMFR gently releases these restrictions so your child can move, breathe, and grow without compensation. 🧬", tags: "#Fascia #MFR #PediatricCare #WholeBodyHealth #GulfportMS" },
+  { category: "Education", platform: "Facebook / Blog Caption", title: "The Tongue-Airway-Sleep Connection", hook: "Where your child's tongue rests at night determines how well they breathe — and sleep.", body: "The tongue should rest against the roof of the mouth — not the bottom. When it doesn't:\n😮 The airway narrows\n😤 Mouth breathing increases\n😴 Sleep quality drops\n😟 Focus and behavior suffer during the day\n\nMyofunctional therapy retrains this pattern. It's not about willpower — it's about muscle memory. And we can change it at any age.", tags: "#TongueTie #SleepApnea #MouthBreathing #MyofunctionalTherapy #KidsSleep" },
+  // ── Collaboration ──
+  { category: "Collaboration", platform: "Reel / Short Video", title: "Two Therapists. One Goal.", hook: "What happens when a myofascial therapist and a myofunctional therapist team up?", body: "Anthony (MFR) releases the soft tissue restrictions — fascia, muscles, connective tissue. Courtney (MFT) re-educates the movement patterns — tongue, lips, swallow, breathe. Together we address the WHY behind tongue tie, torticollis, TMJ, and feeding issues at the root. This is whole-body pediatric care.", tags: "#TeamWork #PediatricCare #TongueTie #MFR #MyofunctionalTherapy" },
+  { category: "Collaboration", platform: "Instagram / Facebook", title: "Release. Then Retrain.", hook: "There's an order to healing — and most people skip the first step.", body: "You can't effectively retrain a muscle that's locked in tension.\n\nThat's why our approach always follows this sequence:\n\n1️⃣ Anthony releases the fascial restriction\n2️⃣ Courtney retrains the movement pattern\n\nRelease without retraining means patterns return.\nRetraining without release means you're fighting the tissue.\n\nTogether — it sticks.", tags: "#ReleaseThenRetrain #MFR #MyofunctionalTherapy #PediatricTherapy #GulfportMS" },
+  { category: "Collaboration", platform: "Reel / Story", title: "A Day in Our Practice", hook: "Here's what it actually looks like when your child sees both of us.", body: "📋 We start with a whole-body assessment\n🤲 Anthony works the soft tissue — neck, jaw, oral floor, cranium\n💬 Courtney evaluates tongue posture, swallow, and breathing patterns\n📱 You leave with a home program and video instructions\n📅 We co-treat when needed and communicate between every visit\n\nThis isn't two separate appointments. It's one coordinated plan.", tags: "#PediatricCare #TeamApproach #TongueTie #MFR #GulfportMS" },
+  // ── Condition Spotlight ──
+  { category: "Condition Spotlight", platform: "Carousel / Story", title: "Tongue Tie: The Full Picture", hook: "Frenectomy is step 1. Rehab is where healing actually happens.", body: "Releasing a lip or tongue tie without soft tissue therapy and oral motor retraining often leads to reattachment or incomplete results. Here's what post-frenectomy care looks like with our team:\n✅ MFR to decompress oral floor tension\n✅ Suboccipital release for neck & jaw connection\n✅ Oral motor retraining for latch, swallow, and breathing\n✅ Home exercise videos to reinforce every session", tags: "#TongueTie #LipTie #Frenectomy #PostFrenectomyCare #PediatricTherapy" },
+  { category: "Condition Spotlight", platform: "Instagram / Facebook", title: "Torticollis Isn't Just a Stiff Neck", hook: "Your baby tilts their head to one side — but it's connected to their jaw, their latch, and their whole spine.", body: "Torticollis is a restriction pattern — often starting in the SCM muscle — that creates a cascade through the whole body. Our combined approach:\n🔵 Anthony releases the fascia from neck to sacrum\n🔵 Courtney addresses the oral compensatory patterns that develop alongside it\nEarly treatment makes all the difference.", tags: "#Torticollis #BabyTherapy #PediatricPT #MFR" },
+  { category: "Condition Spotlight", platform: "Carousel", title: "Is Your Child a Mouth Breather?", hook: "Mouth breathing isn't just a habit — it's a structural and functional problem with real consequences.", body: "Signs your child may be a chronic mouth breather:\n👄 Lips always slightly open\n😴 Snoring or restless sleep\n😤 Frequent colds or congestion\n🦷 Narrow palate or crowded teeth\n😵 Daytime fatigue, focus problems\n\nOur team addresses BOTH the structural tension (Anthony) keeping the airway restricted AND the muscle pattern (Courtney) driving the open-mouth default.\n\nBreathing correctly changes everything.", tags: "#MouthBreathing #NasalBreathing #PediatricAirway #MyofunctionalTherapy #MFR" },
+  { category: "Condition Spotlight", platform: "Facebook / Instagram", title: "Colic, Reflux & Gut Tension", hook: "Before you try another formula — consider that your baby's gut tension might be a body-wide pattern, not just digestion.", body: "Infant colic and reflux are often linked to:\n🔗 Diaphragm tension limiting downward movement of food\n🔗 Poor suck-swallow-breathe coordination causing air swallowing\n🔗 Cranial compression from birth affecting vagal nerve tone\n\nWe don't treat reflux as a GI issue alone. We look at the whole fascial and neuromuscular picture — and often find the relief families have been searching for.", tags: "#InfantColic #BabyReflux #MFR #VagalNerve #PediatricTherapy" },
+  { category: "Condition Spotlight", platform: "Instagram / Facebook", title: "Ear Infections & Mouth Breathing — The Hidden Link", hook: "If your child has had 3+ ear infections, their breathing pattern may be contributing.", body: "Chronic mouth breathing leads to:\n👂 Poor Eustachian tube drainage\n🦠 Increased bacterial load in the nasal passages\n💧 Fluid accumulation behind the eardrum\n\nMyofunctional therapy can retrain nasal breathing and reduce the cycle of chronic ear infections — often helping families avoid repeated rounds of tubes.\n\nCombined with Anthony's temporal bone and cervical fascial release, we address the drainage pathway directly.", tags: "#EarInfections #OtitisMedia #MouthBreathing #MyofunctionalTherapy #PediatricCare" },
+  // ── Parent Trust ──
+  { category: "Parent Trust", platform: "Facebook / Story", title: "You Know Something Is Off", hook: "Mama instincts are real. If your baby struggles to latch, has a flat spot, or always looks to one side — trust that feeling.", body: "You don't have to wait for a diagnosis. Our team does a whole-body assessment to find what's contributing to your child's challenges. We listen. We look at the full picture. And we build a plan that makes sense for your family.", tags: "#MomLife #PediatricCare #TrustYourInstincts #GulfportMS" },
+  { category: "Parent Trust", platform: "Facebook / Instagram", title: "We Meet You Where You Are", hook: "You've probably already Googled everything. You've already tried a few things. You're exhausted.", body: "We get it.\n\nWhen you come to us, we don't start with judgment. We start with listening.\n\nTell us what you've tried. Tell us what's helped. Tell us what's scared you. Then we'll do a full assessment — together — and build a plan that actually fits your child's body and your family's life.\n\nYou are your child's best advocate. We're here to partner with you.", tags: "#PediatricCare #ParentSupport #TongueTie #GulfportMS #YouGotThis" },
+  // ── FAQ ──
+  { category: "FAQ", platform: "Story / Caption", title: "Is MFR safe for newborns?", hook: "Yes — and it's incredibly gentle.", body: "Myofascial Release for infants uses NO manipulation, NO cracking, and NO force. It's a slow, sustained pressure — often just a few grams — applied with fingertips. Most babies relax, some fall asleep. It's one of the most gentle and effective therapies available for newborns and toddlers.", tags: "#MFRForBabies #GentleTherapy #SafeForInfants #PediatricMFR" },
+  { category: "FAQ", platform: "Story / Caption", title: "How many sessions will my child need?", hook: "Every child is different — but here's a general guide.", body: "Acute issues (post-frenectomy, mild torticollis): 4–8 sessions\nChronic patterns (long-standing mouth breathing, feeding aversion): 8–16+ sessions\nMaintenance: monthly check-ins recommended\nWe track progress every visit and adjust your child's plan as they grow.", tags: "#PediatricTherapy #WhatToExpect #TreatmentPlan" },
+  { category: "FAQ", platform: "Story / Instagram", title: "Do we need a referral?", hook: "No referral needed — but we love working alongside your pediatrician, dentist, and lactation consultant.", body: "You can schedule directly with us. No referral required.\n\nThat said, we believe in team-based care. If your child is working with a pediatrician, lactation consultant, dentist, or speech therapist, we'll communicate with them — because coordinated care gets faster results.\n\nWe're also happy to co-treat with Courtney on complex cases where both MFR and myofunctional therapy are needed in the same visit.", tags: "#NoReferralNeeded #PediatricTherapy #GulfportMS #TongueTie #TrueBalanceFitness" },
+  { category: "FAQ", platform: "Facebook / Story", title: "What age can kids start?", hook: "Day 1. We've worked with babies less than 2 weeks old.", body: "There is no minimum age for myofascial release or myofunctional therapy evaluation. We've treated:\n👶 Newborns (birth trauma, latch issues, tongue tie)\n🍼 Infants 2–12 months (torticollis, colic, plagiocephaly)\n🧒 Toddlers (mouth breathing, speech, sensory)\n👧 School-age children (bruxism, TMJ, airway)\n\nEarly intervention always produces faster, more complete results.", tags: "#EarlyIntervention #PediatricMFR #InfantTherapy #TongueTie #GulfportMS" },
+  // ── Motivational ──
+  { category: "Motivational", platform: "Instagram / Facebook", title: "The Body Knows How to Heal", hook: "We don't fix children. We remove what's getting in the way of their body doing what it already knows how to do.", body: "That's the philosophy behind everything we do.\n\nFascia doesn't need to be forced — it needs to be gently invited to release. Muscles don't need to be pushed — they need to be re-patterned with patience.\n\nYour child's body is incredible. It has been working around restrictions, compensating, adapting. Our job is to give it the room to finally just… be itself.\n\n— Anthony & Courtney", tags: "#HealingPhilosophy #MFR #MyofunctionalTherapy #PediatricCare #TrueBalanceFitness" },
+  { category: "Motivational", platform: "Instagram / Story", title: "Small Hands. Big Results.", hook: "The lightest touch can change the most.", body: "Sometimes parents are surprised by how gentle MFR and myofunctional therapy are.\n\nNo machines. No devices. No hard manipulation.\n\nJust skilled hands, patient pressure, and a deep understanding of how the body organizes itself.\n\nWe've watched babies go from screaming at feeding to nursing peacefully. Toddlers go from constant mouth breathing to sleeping soundly through the night.\n\nSmall hands. Big results. 🤲", tags: "#GentleHealing #PediatricMFR #MyofunctionalTherapy #TongueTie #GulfportMS" },
+];
+
+const VIDEOS = [
+  { title: "What Is Myofascial Release? (Infant Overview)", url: "" },
+  { title: "Tongue Tie: What Happens Post-Frenectomy", url: "" },
+  { title: "Myofunctional Therapy: Nasal Breathing Basics", url: "" },
+  { title: "How to Do the 'Melt' Hold at Home (Infant MFR)", url: "" },
+  { title: "Torticollis: What to Look For in Your Baby", url: "" },
+  { title: "The Tongue-to-Palate Rest Position (Demo)", url: "" },
+  { title: "Post-Frenectomy Stretches: Step-by-Step", url: "" },
+  { title: "What Is Fascia? A Parent's Guide", url: "" },
+  { title: "Lip Tie vs. Tongue Tie: What's the Difference?", url: "" },
+  { title: "Why Mouth Breathing Is More Serious Than You Think", url: "" },
+  { title: "Anthony & Courtney: Our Collaborative Approach", url: "" },
+  { title: "Infant Colic & Fascial Tension — The Connection", url: "" },
+  { title: "Swallow Pattern 101: Does Your Child Swallow Correctly?", url: "" },
+  { title: "Home Exercise: Jaw Relaxation for Kids", url: "" },
+  { title: "The Release-Retrain Method Explained", url: "" },
+  { title: "Plagiocephaly: Beyond the Helmet", url: "" },
+  { title: "Sleep Disordered Breathing in Children", url: "" },
+  { title: "What to Expect at Your First Visit", url: "" },
+  { title: "Parent Q&A: Top 10 Questions Answered", url: "" },
+  { title: "Ear Infections & Myofunctional Therapy", url: "" },
+];
+
+const TESTIMONIES = [
+  { name: "Sarah M.", child: "Newborn — Tongue Tie / Latch", stars: 5, quote: "My son couldn't latch at all for the first 2 weeks. After his first session with Anthony and then working with Courtney on his swallow, he nursed on his own within 48 hours. I cried the whole drive home — the good kind of crying.", placeholder: true },
+  { name: "Destiny R.", child: "4-month-old — Torticollis", stars: 5, quote: "We were told he'd need a helmet and possibly surgery. After 6 sessions of MFR with Anthony and doing the home exercises Courtney showed us, his head shape improved significantly. His pediatrician couldn't believe it.", placeholder: true },
+  { name: "Marcus & Tara J.", child: "2-year-old — Mouth Breathing / Speech Delay", stars: 5, quote: "Courtney identified the tongue tie connection to our daughter's speech delay that no one else caught. Paired with Anthony's jaw and neck work, she went from 10 words to full sentences in about 3 months. This team is something special.", placeholder: true },
+  { name: "Keisha B.", child: "6-month-old — Colic / Reflux", stars: 5, quote: "We tried everything — every formula, every position, every remedy Pinterest had to offer. One session with Anthony addressing her diaphragm and abdominal tension and she slept 5 hours straight for the first time. I wish I'd found this sooner.", placeholder: true },
+];
+
+const TABS = ["🏠 Overview", "🔗 Shared Conditions", "🧭 Philosophies", "📱 Social Content", "🎥 Video Library", "⭐ Testimonies"];
+
+// ─── COMPONENTS ────────────────────────────────────────────────────────────
+const Tag = ({ text }) => (
+  <span style={{ background: "rgba(42,140,140,0.15)", color: "#2A8C8C", fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, letterSpacing: 0.5, display: "inline-block", margin: "2px 2px 0 0" }}>
+    {text.replace("#", "")}
+  </span>
+);
+
+const Card = ({ children, style = {} }) => (
+  <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "20px 24px", ...style }}>
+    {children}
+  </div>
+);
+
+// ─── MAIN APP ───────────────────────────────────────────────────────────────
+function App() {
+  const [activeTab, setActiveTab] = useState(0);
+  const [expandedCondition, setExpandedCondition] = useState(null);
+  const [expandedPost, setExpandedPost] = useState(null);
+  const [filterCat, setFilterCat] = useState("All");
+  const [copied, setCopied] = useState(null);
+
+  const categories = ["All", ...Array.from(new Set(SOCIAL_POSTS.map(p => p.category)))];
+  const filteredPosts = filterCat === "All" ? SOCIAL_POSTS : SOCIAL_POSTS.filter(p => p.category === filterCat);
+
+  const copyToClipboard = (text, id) => {
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a1628 0%, #0f1f35 50%, #0d2230 100%)", fontFamily: "'Georgia', serif", color: "#e8edf2" }}>
+      {/* Header */}
+      <div style={{ padding: "40px 32px 0", maxWidth: 900, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 8 }}>
+          <div>
+            <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: 3, color: "#2A8C8C", textTransform: "uppercase", marginBottom: 6 }}>Collaborative Practice Workspace</div>
+            <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0, lineHeight: 1.2, letterSpacing: -0.5 }}>
+              True Balance <span style={{ color: "#2A8C8C" }}>Pediatric</span> Therapy
+            </h1>
+            <p style={{ color: "#7a9ab0", fontSize: 14, margin: "6px 0 0", fontStyle: "italic" }}>Anthony Anderson, CPT · Courtney, MFT — Content & Strategy Hub</p>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: 4, marginTop: 28, overflowX: "auto", paddingBottom: 2 }}>
+          {TABS.map((tab, i) => (
+            <button key={i} onClick={() => setActiveTab(i)} style={{ padding: "8px 16px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap", fontFamily: "inherit", transition: "all 0.2s", background: activeTab === i ? "#2A8C8C" : "rgba(255,255,255,0.06)", color: activeTab === i ? "#fff" : "#7a9ab0", fontWeight: activeTab === i ? 700 : 400 }}>
+              {tab}
+            </button>
+          ))}
+        </div>
+        <div style={{ height: 1, background: "rgba(255,255,255,0.06)", marginTop: 12 }} />
+      </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "28px 32px 60px" }}>
+
+        {/* ── OVERVIEW ── */}
+        {activeTab === 0 && (
+          <div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+              <Card style={{ borderLeft: "3px solid #2A8C8C" }}>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: "#2A8C8C", marginBottom: 8, fontFamily: "monospace" }}>ANTHONY ANDERSON</div>
+                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Myofascial Release Therapist</div>
+                <div style={{ fontSize: 13, color: "#7a9ab0", lineHeight: 1.6 }}>CPT/CES · True Balance Fitness · 10 years pediatric soft tissue</div>
+              </Card>
+              <Card style={{ borderLeft: "3px solid #68B5B8" }}>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: "#68B5B8", marginBottom: 8, fontFamily: "monospace" }}>COURTNEY</div>
+                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Myofunctional Therapist</div>
+                <div style={{ fontSize: 13, color: "#7a9ab0", lineHeight: 1.6 }}>Oral motor re-education · Airway & feeding specialist</div>
+              </Card>
+            </div>
+
+            <Card style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: "#2A8C8C", marginBottom: 12, fontFamily: "monospace" }}>OUR COMBINED APPROACH</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 16, alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#2A8C8C", marginBottom: 8 }}>Anthony Releases</div>
+                  {["Fascial restrictions", "Cervical & cranial tension", "Oral floor & diaphragm", "Whole-body compensation patterns"].map(p => (
+                    <div key={p} style={{ fontSize: 13, color: "#b0c4d0", padding: "4px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>→ {p}</div>
+                  ))}
+                </div>
+                <div style={{ fontSize: 28, color: "#2A8C8C" }}>+</div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#68B5B8", marginBottom: 8 }}>Courtney Re-educates</div>
+                  {["Tongue resting posture", "Nasal breathing patterns", "Swallow mechanics", "Oral motor coordination"].map(p => (
+                    <div key={p} style={{ fontSize: 13, color: "#b0c4d0", padding: "4px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>→ {p}</div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: "#2A8C8C", marginBottom: 12, fontFamily: "monospace" }}>GROWTH TARGETS</div>
+              <div style={{ display: "flex", gap: 32 }}>
+                {[["Current", "10", "clients/mo"], ["Target", "40", "clients/mo"], ["Conditions", "15", "treated"], ["Social Posts", "20", "ready now"], ["Video Topics", "20", "planned"]].map(([label, val, sub]) => (
+                  <div key={label} style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 11, color: "#7a9ab0", letterSpacing: 1 }}>{label}</div>
+                    <div style={{ fontSize: 32, fontWeight: 700, color: "#2A8C8C", lineHeight: 1 }}>{val}</div>
+                    <div style={{ fontSize: 11, color: "#7a9ab0" }}>{sub}</div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* ── CONDITIONS ── */}
+        {activeTab === 1 && (
+          <div>
+            <p style={{ color: "#7a9ab0", fontSize: 14, marginBottom: 20, marginTop: 0 }}>Click any condition to expand both therapists' roles. Use these breakdowns for patient education, social content, and referral conversations.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {CONDITIONS.map((c, i) => (
+                <div key={i} style={{ background: expandedCondition === i ? "rgba(42,140,140,0.1)" : "rgba(255,255,255,0.03)", border: `1px solid ${expandedCondition === i ? "rgba(42,140,140,0.4)" : "rgba(255,255,255,0.07)"}`, borderRadius: 12, overflow: "hidden", transition: "all 0.2s", cursor: "pointer" }} onClick={() => setExpandedCondition(expandedCondition === i ? null : i)}>
+                  <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <span style={{ fontSize: 20 }}>{c.icon}</span>
+                      <span style={{ fontWeight: 700, fontSize: 15 }}>{c.name}</span>
+                    </div>
+                    <span style={{ color: "#2A8C8C", fontSize: 18 }}>{expandedCondition === i ? "−" : "+"}</span>
+                  </div>
+                  {expandedCondition === i && (
+                    <div style={{ padding: "0 20px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                      <div style={{ background: "rgba(28,43,57,0.6)", borderRadius: 8, padding: 16 }}>
+                        <div style={{ fontSize: 11, color: "#2A8C8C", letterSpacing: 2, marginBottom: 8, fontFamily: "monospace" }}>ANTHONY — MFR</div>
+                        <div style={{ fontSize: 13, color: "#c0d4e0", lineHeight: 1.7 }}>{c.anthony}</div>
+                      </div>
+                      <div style={{ background: "rgba(28,43,57,0.6)", borderRadius: 8, padding: 16 }}>
+                        <div style={{ fontSize: 11, color: "#68B5B8", letterSpacing: 2, marginBottom: 8, fontFamily: "monospace" }}>COURTNEY — MFT</div>
+                        <div style={{ fontSize: 13, color: "#c0d4e0", lineHeight: 1.7 }}>{c.courtney}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── PHILOSOPHIES ── */}
+        {activeTab === 2 && (
+          <div>
+            <p style={{ color: "#7a9ab0", fontSize: 14, marginBottom: 20, marginTop: 0 }}>Your shared philosophy is the foundation of your brand story. Use these points for bios, website copy, and patient consultations.</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+              {PHILOSOPHIES.map((p, i) => (
+                <Card key={i} style={{ borderTop: `3px solid ${p.accent}` }}>
+                  <div style={{ fontSize: 12, color: p.accent, letterSpacing: 2, marginBottom: 12, fontFamily: "monospace" }}>{p.label.toUpperCase()}</div>
+                  {p.points.map((pt, j) => (
+                    <div key={j} style={{ display: "flex", gap: 10, padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                      <span style={{ color: p.accent, fontSize: 12, marginTop: 2 }}>◆</span>
+                      <span style={{ fontSize: 13, color: "#c0d4e0", lineHeight: 1.6 }}>{pt}</span>
+                    </div>
+                  ))}
+                </Card>
+              ))}
+            </div>
+            <Card>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: "#2A8C8C", marginBottom: 12, fontFamily: "monospace" }}>WHERE YOUR PHILOSOPHIES CONVERGE</div>
+              {[
+                ["Structure precedes function", "Anthony releases the tissue so Courtney can retrain the movement — without fascial restriction, motor re-education is fighting an uphill battle."],
+                ["Root cause over symptom management", "Both modalities ask WHY the dysfunction exists, not just how to suppress it."],
+                ["The body is one integrated system", "A tongue tie affects the jaw, the neck, the cranium, the diaphragm, and beyond. Both of you treat the chain, not the link."],
+                ["Patient education accelerates outcomes", "Families who understand the 'why' comply with home programs and make faster progress."],
+              ].map(([title, desc], i) => (
+                <div key={i} style={{ padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{title}</div>
+                  <div style={{ fontSize: 13, color: "#8aacbd", lineHeight: 1.6 }}>{desc}</div>
+                </div>
+              ))}
+            </Card>
+          </div>
+        )}
+
+        {/* ── SOCIAL CONTENT ── */}
+        {activeTab === 3 && (
+          <div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+              {categories.map(cat => (
+                <button key={cat} onClick={() => setFilterCat(cat)} style={{ padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 12, fontFamily: "inherit", fontWeight: filterCat === cat ? 700 : 400, background: filterCat === cat ? "#2A8C8C" : "rgba(255,255,255,0.07)", color: filterCat === cat ? "#fff" : "#7a9ab0", transition: "all 0.2s" }}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {filteredPosts.map((post, i) => (
+                <div key={i} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, overflow: "hidden" }}>
+                  <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", cursor: "pointer" }} onClick={() => setExpandedPost(expandedPost === i ? null : i)}>
+                    <div>
+                      <div style={{ display: "flex", gap: 8, marginBottom: 6, alignItems: "center" }}>
+                        <span style={{ fontSize: 11, background: "rgba(42,140,140,0.15)", color: "#2A8C8C", padding: "2px 8px", borderRadius: 10, fontFamily: "monospace", letterSpacing: 1 }}>{post.category}</span>
+                        <span style={{ fontSize: 11, color: "#5a7a90", fontStyle: "italic" }}>{post.platform}</span>
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: 15 }}>{post.title}</div>
+                      <div style={{ fontSize: 13, color: "#7a9ab0", marginTop: 4, fontStyle: "italic" }}>"{post.hook}"</div>
+                    </div>
+                    <span style={{ color: "#2A8C8C", fontSize: 18, marginLeft: 12 }}>{expandedPost === i ? "−" : "+"}</span>
+                  </div>
+                  {expandedPost === i && (
+                    <div style={{ padding: "0 18px 18px" }}>
+                      <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 10, padding: 16, marginBottom: 12, fontSize: 13, color: "#c0d4e0", lineHeight: 1.8, whiteSpace: "pre-line" }}>
+                        <em style={{ color: "#7a9ab0", fontSize: 12 }}>Hook:</em> {post.hook}<br /><br />
+                        {post.body}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 12 }}>
+                        {post.tags.split(" ").map(t => <Tag key={t} text={t} />)}
+                      </div>
+                      <button onClick={() => copyToClipboard(`${post.hook}\n\n${post.body}\n\n${post.tags}`, i)} style={{ padding: "8px 18px", background: copied === i ? "#2A8C8C" : "rgba(42,140,140,0.15)", color: copied === i ? "#fff" : "#2A8C8C", border: "1px solid #2A8C8C", borderRadius: 8, cursor: "pointer", fontSize: 12, fontFamily: "inherit", fontWeight: 700, transition: "all 0.2s" }}>
+                        {copied === i ? "✓ Copied!" : "Copy Caption"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── VIDEO LIBRARY ── */}
+        {activeTab === 4 && (
+          <div>
+            <p style={{ color: "#7a9ab0", fontSize: 14, marginBottom: 20, marginTop: 0 }}>20 video topics planned. Paste a YouTube video ID into the <code style={{ background: "rgba(255,255,255,0.08)", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>url</code> field for any title to make it go live. Add 1–2 per month as you film.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {VIDEOS.map((v, i) => (
+                <Card key={i} style={{ padding: "14px 18px" }}>
+                  {v.url ? (
+                    <>
+                      <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>{v.title}</div>
+                      <div style={{ borderRadius: 8, overflow: "hidden", background: "#000", aspectRatio: "16/9" }}>
+                        <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${v.url}`} title={v.title} frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(42,140,140,0.12)", border: "1px dashed rgba(42,140,140,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <span style={{ fontSize: 12, color: "#2A8C8C" }}>▶</span>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, color: "#c0d4e0", fontWeight: 600 }}>{v.title}</div>
+                        <div style={{ fontSize: 11, color: "#4a6a80", marginTop: 2 }}>Pending — add YouTube ID to go live</div>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#2a4a5a", background: "rgba(42,140,140,0.07)", padding: "2px 8px", borderRadius: 8 }}>#{i + 1}</div>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── TESTIMONIES ── */}
+        {activeTab === 5 && (
+          <div>
+            <p style={{ color: "#7a9ab0", fontSize: 14, marginBottom: 20, marginTop: 0 }}>Placeholder testimonies to model the format. Replace with real parent feedback as it comes in — great for social proof, website copy, and patient consultations.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {TESTIMONIES.map((t, i) => (
+                <Card key={i} style={{ borderLeft: "3px solid #2A8C8C", position: "relative" }}>
+                  {t.placeholder && (
+                    <div style={{ position: "absolute", top: 12, right: 16, fontSize: 10, color: "#4a6a80", background: "rgba(255,255,255,0.05)", padding: "2px 8px", borderRadius: 10, letterSpacing: 1 }}>SAMPLE</div>
+                  )}
+                  <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+                    {Array.from({ length: t.stars }).map((_, s) => (
+                      <span key={s} style={{ color: "#f5c842", fontSize: 14 }}>★</span>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: 15, color: "#d0e4f0", lineHeight: 1.75, fontStyle: "italic", marginBottom: 14 }}>"{t.quote}"</div>
+                  <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #2A8C8C, #1C2B39)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#fff" }}>
+                      {t.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{t.name}</div>
+                      <div style={{ fontSize: 12, color: "#7a9ab0" }}>{t.child}</div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              <Card style={{ border: "2px dashed rgba(42,140,140,0.25)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 28, textAlign: "center" }}>
+                <div style={{ fontSize: 28, color: "#2A8C8C", marginBottom: 8 }}>+</div>
+                <div style={{ fontSize: 13, color: "#7a9ab0", fontWeight: 700 }}>Add a real testimony</div>
+                <div style={{ fontSize: 12, color: "#4a6a80", marginTop: 4 }}>Paste parent feedback into the TESTIMONIES array in the source</div>
+              </Card>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
